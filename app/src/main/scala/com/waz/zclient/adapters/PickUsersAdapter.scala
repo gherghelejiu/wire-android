@@ -181,9 +181,9 @@ class PickUsersAdapter(topUsersOnItemTouchListener: SearchResultOnItemTouchListe
         val contactIsSelected = searchUserController.selectedUsers.contains(connectedUser.id)
         holder.asInstanceOf[UserViewHolder].bind(connectedUser, contactIsSelected)
       case UnconnectedUser =>
-        val connectedUser = directoryResults(item.index)
-        val contactIsSelected = searchUserController.selectedUsers.contains(connectedUser.id)
-        holder.asInstanceOf[UserViewHolder].bind(connectedUser, contactIsSelected)
+        val unconnectedUser = directoryResults(item.index)
+        val contactIsSelected = searchUserController.selectedUsers.contains(unconnectedUser.id)
+        holder.asInstanceOf[UserViewHolder].bind(unconnectedUser, contactIsSelected)
       case SectionHeader =>
         holder.asInstanceOf[SectionHeaderViewHolder].bind(item.section, item.name)
       case NameInitialSeparator =>

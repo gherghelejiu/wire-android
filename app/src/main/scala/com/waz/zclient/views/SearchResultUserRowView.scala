@@ -46,7 +46,8 @@ class SearchResultUserRowView(val context: Context, val attrs: AttributeSet, val
     z <- inject[Signal[ZMessaging]]
     uId <- userId
     isGuest <- z.teams.isGuest(uId)
-  } yield isGuest
+    knownUsers <- z.users.acceptedOrBlockedUsers
+  } yield isGuest && knownUsers.contains(uId)
 
   var userData = Option.empty[UserData]
 

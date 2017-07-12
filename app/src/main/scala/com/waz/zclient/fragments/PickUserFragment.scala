@@ -553,21 +553,18 @@ class PickUserFragment extends BaseFragment[PickUserFragment.Container]
   }
 
   override def onUserClicked(userId: UserId, position: Int, anchorView: View): Unit = {
+
     val user: User = getStoreFactory.getZMessagingApiStore.getApi.getUser(userId.str)
     if (user == null || user.isMe || getControllerFactory == null || getControllerFactory.isTornDown) {
       return
     }
+
     TrackingUtils.onUserSelectedInStartUI(trackingController, user, anchorView.isInstanceOf[ChatheadWithTextFooter], isAddingToConversation, position, searchResultAdapter)
 
-    UserSignal(userId).head.map{userData =>
-      if (userData.connection == ConnectionStatus.Accepted || isTeamAccount) {
-        if (anchorView.isSelected) {
-          searchUserController.addUser(userId)
-        } else {
-          searchUserController.removeUser(userId)
-        }
+    UserSignal(userId).head.map{ userData =>
+      if (userData.connection == ConnectionStatus.Accepted || (isTeamAccount && userAccountsController.isTeamMember(userData.id))) {
+        if (anchorView.isSelected) searchUserController.addUser(userId) else searchUserController.removeUser(userId)
         setConversationQuickMenuVisible(searchUserController.selectedUsers.nonEmpty)
-
       } else if (!anchorView.isInstanceOf[ContactRowView] || (userData.connection != ConnectionStatus.Unconnected)) {
         showUser(user, anchorView)
       }
@@ -602,6 +599,7 @@ class PickUserFragment extends BaseFragment[PickUserFragment.Container]
     if (user == null) {
       return
     }
+
     user.getConnectionStatus match {
       case ConnectionStatus.Unconnected =>
         self.head.map { self =>
@@ -820,14 +818,13 @@ class PickUserFragment extends BaseFragment[PickUserFragment.Container]
     getArguments.getBoolean(PickUserFragment.ARGUMENT_ADD_TO_CONVERSATION)
   }
 
-  private def isPrivateAccount: Boolean = !isTeamAccount
-
-  private def isTeamAccount: Boolean = userAccountsController.isTeamAccount
-
   private def addingToConversation: Option[ConvId] = {
     Option(getArguments.getString(PickUserFragment.ARGUMENT_CONVERSATION_ID)).map(ConvId(_))
   }
 
+  private def isPrivateAccount: Boolean = !isTeamAccount
+
+  private def isTeamAccount: Boolean = userAccountsController.isTeamAccount
   private def closeStartUI(): Unit = {
     KeyboardUtils.hideKeyboard(getActivity)
     searchUserController.setFilter("")
